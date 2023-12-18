@@ -3,7 +3,7 @@ import { PersonCard } from "./components/person_card";
 function App() {
   return (
     <>
-      <PersonCard />
+      <PersonCard id={1} />
     </>
   );
 }

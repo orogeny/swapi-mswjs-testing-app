@@ -42,8 +42,8 @@ const Stat = ({ name, value }: { name: string; value: string | string[] }) => (
   </div>
 );
 
-function PersonCard() {
-  const { loading, loaded, data } = useFetch<PersonData>("/people/1");
+function PersonCard({ id }: { id: number }) {
+  const { loading, loaded, data } = useFetch<PersonData>(`/people/${id}`);
 
   if (loading) {
     return <p>Loading...</p>;
