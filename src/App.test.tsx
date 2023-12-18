@@ -3,9 +3,9 @@ import { describe, expect, test } from "vitest";
 import App from "./App";
 
 describe("App", () => {
-  test("renders Today", () => {
+  test("renders gender", () => {
     render(<App />);
 
-    expect(screen.getByText(/today/i)).toBeInTheDocument();
+    expect(screen.getByText(/gender/i)).toBeInTheDocument();
   });
 });

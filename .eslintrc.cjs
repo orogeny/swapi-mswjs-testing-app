@@ -14,5 +14,13 @@ module.exports = {
       "warn",
       { allowConstantExport: true },
     ],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        argsIgnorePattern: "^_[A-z0-9]*$",
+        varsIgnorePattern: "^_[A-z0-9]*$",
+      },
+    ],
   },
 };

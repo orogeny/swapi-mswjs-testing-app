@@ -1,7 +1,9 @@
+import { PersonCard } from "./components/person_card";
+
 function App() {
   return (
     <>
-      <p>Today is {new Date().toLocaleDateString()}</p>
+      <PersonCard />
     </>
   );
 }
