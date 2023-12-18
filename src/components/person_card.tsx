@@ -43,37 +43,33 @@ const Stat = ({ name, value }: { name: string; value: string | string[] }) => (
 );
 
 function PersonCard({ id }: { id: number }) {
-  const { loading, loaded, data, statusCode, error } = useFetch<PersonData>(
-    `/people/${id}`
-  );
+  const result = useFetch<PersonData>(`/people/${id}`);
 
-  if (loading) {
+  if (result.loading) {
     return <p>Loading...</p>;
   }
 
-  if (error) {
-    if (statusCode === 418) {
+  if (result.error) {
+    if (result.statusCode === 418) {
       return <p>418 I'm a tea pot, silly</p>;
     }
-    if (statusCode === 500) {
+    if (result.statusCode === 500) {
       return <p>Oops... something went wrong, try again 🤕</p>;
     }
-    return <p>Doh! Server says {error.message}</p>;
+    return <p>Doh! Server says {result.error.message}</p>;
   }
 
-  if (loaded) {
+  if (result.loaded) {
     return (
-      <>
-        <div className="person-card">
-          {Object.entries(data).map(([key, value]) => (
-            <Stat key={key} name={key} value={value} />
-          ))}
-        </div>
-      </>
+      <div className="person-card">
+        {Object.entries(result.data).map(([key, value]) => (
+          <Stat key={key} name={key} value={value} />
+        ))}
+      </div>
     );
   }
 
-  return <p>No data currently</p>;
+  return <p>Currently no data</p>;
 }
 
 export { PersonCard };

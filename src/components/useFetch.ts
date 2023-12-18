@@ -1,45 +1,63 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { SWAPI_BASE_URL } from "../environment_variables";
 
-type State<T> =
-  | {
-      loading: false;
-      loaded: false;
-      data: null;
-      statusCode: number;
-      error: null;
-    }
-  | {
-      loading: true;
-      loaded: false;
-      data: null;
-      statusCode: number;
-      error: null;
-    }
-  | { loading: false; loaded: true; data: T; statusCode: number; error: null }
-  | {
-      loading: false;
-      loaded: false;
-      data: null;
-      statusCode: number;
-      error: Error;
-    };
+type State<T> = {
+  loading: boolean;
+  statusCode?: number;
+  error: Error | null;
+} & ({ loaded: true; data: T } | { loaded: false; data: null });
+
+type Action<T> =
+  | { type: "reset" }
+  | { type: "loading" }
+  | { type: "responded"; status: number }
+  | { type: "loaded"; data: T }
+  | { type: "failed"; error: Error }
+  | { type: "finished" };
+
+function initialState<T>(): State<T> {
+  return {
+    loading: false,
+    loaded: false,
+    data: null,
+    statusCode: undefined,
+    error: null,
+  };
+}
+
+function reducer<T>(state: State<T>, action: Action<T>): State<T> {
+  switch (action.type) {
+    case "reset":
+      return initialState();
+
+    case "loading":
+      return { ...state, loading: true };
+
+    case "responded":
+      return { ...state, statusCode: action.status };
+
+    case "loaded":
+      return { ...state, loaded: true, data: action.data };
+
+    case "failed":
+      return { ...state, error: action.error };
+
+    case "finished":
+      return { ...state, loading: false };
+  }
+
+  return state;
+}
 
 function useFetch<T>(url: string) {
-  const [loading, setLoading] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  const [data, setData] = useState<T | null>(null);
-  const [statusCode, setStatusCode] = useState(0);
-  const [fetchError, setFetchError] = useState<Error | null>(null);
+  const [state, dispatch] = useReducer(reducer, null, initialState);
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function getData() {
       try {
-        setLoading(true);
-        setLoaded(false);
-        setData(null);
+        dispatch({ type: "loading" });
 
         const response = await fetch(`${SWAPI_BASE_URL}${url}`, {
           headers: {
@@ -48,25 +66,23 @@ function useFetch<T>(url: string) {
           signal: controller.signal,
         });
 
-        setStatusCode(response.status);
+        dispatch({ type: "responded", status: response.status });
 
         const result = (await response.json()) as T;
 
-        setData(result);
-        setLoaded(true);
+        dispatch({ type: "loaded", data: result });
       } catch (error) {
         if (error instanceof DOMException) {
-          setLoaded(false);
-          setData(null);
-          setStatusCode(0);
-          setFetchError(new Error("Fetch aborted"));
+          dispatch({ type: "reset" });
         } else if (error instanceof Error) {
-          setFetchError(error);
+          console.log("fetch errored");
+          dispatch({ type: "failed", error });
         } else {
-          setFetchError(new Error("Fetch failed"));
+          console.log("fetch failed");
+          dispatch({ type: "failed", error: new Error("Fetch failed") });
         }
       } finally {
-        setLoading(false);
+        dispatch({ type: "finished" });
       }
     }
 
@@ -75,7 +91,7 @@ function useFetch<T>(url: string) {
     return () => controller.abort();
   }, [url]);
 
-  return { loading, loaded, data, statusCode, error: fetchError } as State<T>;
+  return { ...state } as State<T>;
 }
 
 export { useFetch };
