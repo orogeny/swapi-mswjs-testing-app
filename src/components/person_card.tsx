@@ -43,10 +43,19 @@ const Stat = ({ name, value }: { name: string; value: string | string[] }) => (
 );
 
 function PersonCard({ id }: { id: number }) {
-  const { loading, loaded, data } = useFetch<PersonData>(`/people/${id}`);
+  const { loading, loaded, data, statusCode, error } = useFetch<PersonData>(
+    `/people/${id}`
+  );
 
   if (loading) {
     return <p>Loading...</p>;
+  }
+
+  if (error) {
+    if (statusCode === 500) {
+      return <p>Oops... something went wrong, try again 🤕</p>;
+    }
+    return <p>Doh! Server says {error.message}</p>;
   }
 
   if (loaded) {
