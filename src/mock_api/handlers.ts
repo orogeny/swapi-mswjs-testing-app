@@ -33,7 +33,6 @@ const person1 = {
 
 export const handlers = [
   http.get(`${SWAPI_BASE_URL}/people/1`, (_) => {
-    console.log("mock get: ", SWAPI_BASE_URL);
     return HttpResponse.json(person1);
   }),
 ];
