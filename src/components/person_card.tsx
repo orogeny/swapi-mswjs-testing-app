@@ -52,6 +52,9 @@ function PersonCard({ id }: { id: number }) {
   }
 
   if (error) {
+    if (statusCode === 418) {
+      return <p>418 I'm a tea pot, silly</p>;
+    }
     if (statusCode === 500) {
       return <p>Oops... something went wrong, try again 🤕</p>;
     }

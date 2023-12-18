@@ -38,4 +38,23 @@ describe("PersonCard", () => {
       expectedErrorMessage
     );
   });
+
+  test("418 response produces silly error message", async () => {
+    const expectedErrorMessage = "418 I'm a tea pot, silly";
+
+    server.use(
+      http.get(`${SWAPI_BASE_URL}/people/1`, () => {
+        return new HttpResponse(null, {
+          status: 418,
+          statusText: "Ich bin eine Kaffeekanne, Dummkopf",
+        });
+      })
+    );
+
+    render(<PersonCard id={1} />);
+
+    expect(await screen.findByText(/418/i)).toHaveTextContent(
+      expectedErrorMessage
+    );
+  });
 });
