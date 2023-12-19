@@ -1,64 +1,24 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useState } from "react";
 import { SWAPI_BASE_URL } from "../environment_variables";
 
 type State<T> = {
   loading: boolean;
+  loaded: boolean;
   statusCode?: number;
+  data: T | null;
   error: Error | null;
-} & ({ loaded: true; data: T } | { loaded: false; data: null });
-
-type Action<T> =
-  | { type: "reset" }
-  | { type: "loading" }
-  | { type: "responded"; status: number }
-  | { type: "loaded"; data: T }
-  | { type: "failed"; error: Error }
-  | { type: "finished" };
-
-function initialState<T>(): State<T> {
-  return {
-    loading: false,
-    loaded: false,
-    data: null,
-    statusCode: undefined,
-    error: null,
-  };
-}
-
-function reducer<T>(state: State<T>, action: Action<T>): State<T> {
-  switch (action.type) {
-    case "reset":
-      return initialState();
-
-    case "loading":
-      return { ...state, loading: true };
-
-    case "responded":
-      return { ...state, statusCode: action.status };
-
-    case "loaded":
-      return { ...state, loaded: true, data: action.data };
-
-    case "failed":
-      return { ...state, error: action.error };
-
-    case "finished":
-      return { ...state, loading: false };
-  }
-
-  return state;
-}
+};
 
 function useFetch<T>(url: string) {
-  const [state, dispatch] = useReducer(reducer, null, initialState);
+  const [data, setData] = useState<T | null>(null);
+  const [statusCode, setStatusCode] = useState<number | undefined>(undefined);
+  const [fetchError, setFetchError] = useState<Error | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function getData() {
       try {
-        dispatch({ type: "loading" });
-
         const response = await fetch(`${SWAPI_BASE_URL}${url}`, {
           headers: {
             "Content-Type": "application/json",
@@ -66,23 +26,21 @@ function useFetch<T>(url: string) {
           signal: controller.signal,
         });
 
-        dispatch({ type: "responded", status: response.status });
+        setStatusCode(response.status);
 
         const result = (await response.json()) as T;
 
-        dispatch({ type: "loaded", data: result });
+        setData(result);
       } catch (error) {
         if (error instanceof DOMException) {
-          dispatch({ type: "reset" });
+          setData(null);
+          setStatusCode(undefined);
+          setFetchError(null);
         } else if (error instanceof Error) {
-          console.log("fetch errored");
-          dispatch({ type: "failed", error });
+          setFetchError(error);
         } else {
-          console.log("fetch failed");
-          dispatch({ type: "failed", error: new Error("Fetch failed") });
+          setFetchError(new Error("Fetch failed"));
         }
-      } finally {
-        dispatch({ type: "finished" });
       }
     }
 
@@ -91,7 +49,13 @@ function useFetch<T>(url: string) {
     return () => controller.abort();
   }, [url]);
 
-  return { ...state } as State<T>;
+  return {
+    loading: data === null && fetchError === null,
+    loaded: data !== null,
+    data,
+    statusCode,
+    error: fetchError,
+  } as State<T>;
 }
 
 export { useFetch };
