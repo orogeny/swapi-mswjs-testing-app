@@ -1,0 +1,33 @@
+.card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stat {
+  padding: 1px;
+  background-color: slategray;
+  border: 1px solid slategray;
+  border-radius: 6px;
+  width: 360px;
+  display: flex;
+  gap: 6px;
+}
+
+.name {
+  color: white;
+  width: 90px;
+  padding: 2px;
+}
+
+.name p {
+  font-weight: 500;
+  text-align: center;
+}
+
+.value {
+  font-weight: 500;
+  background-color: white;
+  padding-left: 2px;
+  flex: 1 0 auto;
+}

@@ -1,4 +1,5 @@
 import { useFetch } from "./useFetch";
+import styles from "./person_card.module.css";
 
 type PersonData = {
   name: string;
@@ -25,14 +26,14 @@ const StatList = ({ values }: { values: string[] }) =>
   values.map((value, i) => <p key={i}>{value}</p>);
 
 const Stat = ({ name, value }: { name: string; value: string | string[] }) => (
-  <div className="person-stat">
-    <div className="person-stat__name">
+  <div className={styles.stat}>
+    <div className={styles.name}>
       <p>
         {name}
         {":"}
       </p>
     </div>
-    <div className="person-stat__value">
+    <div className={styles.value}>
       {value instanceof Array ? (
         <StatList values={value} />
       ) : (
@@ -61,7 +62,7 @@ function PersonCard({ id }: { id: number }) {
 
   if (result.loaded) {
     return (
-      <div className="person-card">
+      <div className={styles.card}>
         {Object.entries(result.data).map(([key, value]) => (
           <Stat key={key} name={key} value={value} />
         ))}
