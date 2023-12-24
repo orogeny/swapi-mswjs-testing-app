@@ -60,7 +60,7 @@ function PersonCard({ id }: { id: number }) {
     return <p>Doh! Server says {result.error.message}</p>;
   }
 
-  if (result.loaded) {
+  if (result.data) {
     return (
       <div className={styles.card}>
         {Object.entries(result.data).map(([key, value]) => (
